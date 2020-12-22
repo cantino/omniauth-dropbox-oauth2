@@ -9,6 +9,7 @@ module OmniAuth
         :authorize_url      => 'https://www.dropbox.com/oauth2/authorize',
         :token_url          => 'https://api.dropboxapi.com/oauth2/token'
       }
+      option :authorize_options, [:token_access_type]
 
       uid { raw_info['account_id'] }
 
@@ -22,6 +23,14 @@ module OmniAuth
 
       extra do
         { 'raw_info' => raw_info }
+      end
+
+      def authorize_params
+        super.tap do |params|
+          options[:authorize_options].each do |k|
+            params[k] = request.params[k.to_s] unless [nil, ''].include?(request.params[k.to_s])
+          end
+        end
       end
 
       def raw_info
